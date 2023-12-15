@@ -1,0 +1,11 @@
+# generating  error if extra argumrnt passed  
+#!/bin/bash
+if [ "$#" -ne 2 ]; then 
+    echo "  script expect   2   argument   only ."
+    echo " use  $0  < argument1> <argument2>
+    exit 1
+ fi
+
+ echo  "First argument : $1 "
+ echo  " second   argument  $2 "
+    
