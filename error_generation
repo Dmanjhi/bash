@@ -1,4 +1,4 @@
-# generating  error if extra argumrnt passed  
+# generating  error if extra argumrnt passed  in command line 
 #!/bin/bash
 if [ "$#" -ne 2 ]; then 
     echo "  script expect   2   argument   only ."
