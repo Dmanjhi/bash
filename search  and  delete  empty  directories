@@ -1,0 +1,14 @@
+#!/bin/bash
+###search_directory="Path/of/directory" ## provide   path  of  directory ##
+## get   directory   path   from  user  #####
+echo  " Enter path  of  directory  "
+read  -r  search_directory    ##  -r  is used to  ensure  "/" in string  condider  as  literals ######
+
+##### check  if  directory  exist  #########
+if [ ! -d  "$search_directory" ]; then
+    echo  " Error  : path   no  valid "
+    exit 1
+fi   
+###### delete empty  directories############
+find  "$search_directory"  -type   d  -empty  -exec rmdir {} \;
+echo "deletaion sucessfull"
