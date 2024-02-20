@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# File containing IP addresses and hostnames, one per line
+IP_FILE="ip_addresses.txt"
+SSH_USER="steam"
+SSH_PASSWORD="Steam@2021"
+SELECTED_MOUNTS=("/" "/vmdata" "/boot")
+OUTPUT_FILE="/root/script/disk_utilization_output.csv"
+
+# Function to check disk utilization and save to CSV file
+check_and_save_disk_utilization() {
+    # Header row
+    echo "Hostname,IP Address,${SELECTED_MOUNTS[*]/#/,}" > "$OUTPUT_FILE"
+
+    while read -r ip; do
+        # Fetch the hostname from the remote server
+        echo "Fetching hostname for $ip"
+        hostname=$(sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USER@$ip 'hostname' 2>/dev/null)
+        if [ $? -eq 0 ]; then
+            echo "Processing $ip with hostname $hostname"
+
+            row="$hostname,$ip"
+
+            for mount_point in "${SELECTED_MOUNTS[@]}"; do
+                echo "Fetching disk utilization for $mount_point on $ip"
+                output=$(sshpass -p "$SSH_PASSWORD" ssh $SSH_USER@$ip "df -h $mount_point" 2>&1)
+                if [ $? -eq 0 ]; then
+                    disk_utilization=$(echo "$output" | awk 'NR==2{print $5}' | tr -d '%')
+                    row="$row,$mount_point,$disk_utilization"
+                else
+                    row="$row,$mount_point,Error accessing"
+                fi
+            done
+
+            # Append the row to the output file
+            echo "$row" >> "$OUTPUT_FILE"
+        else
+            echo "Error fetching hostname for $ip" >> "$OUTPUT_FILE"
+        fi
+    done < "$IP_FILE"
+}
+
+# Main script
+check_and_save_disk_utilization
+
+echo "Results saved to $OUTPUT_FILE"
